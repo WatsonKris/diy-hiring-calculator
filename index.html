@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIY Hiring Calculator</title>
+<style>
+  /* Layout: two columns like the Bad Hire Calculator. Inputs left, DIY vs recruiter results right. */
+  /* Single dark look on purpose, matching the existing Bad Hire Calculator. */
+  :root {
+    color-scheme: dark;
+    --bg: #0d1b26;
+    --card: #162230;
+    --line: #1e3344;
+    --row-a: #1a3340;
+    --row-b: #162d3a;
+    --deep: #0a1520;
+    --fg: #cce8f4;
+    --fg-strong: #e8f4ff;
+    --muted: #3d7a98;
+    --muted-2: #2d6a88;
+    --soft: #7dd3f0;
+    --cyan: #00d4ff;
+    --red: #cc3333;
+    --red-deep: #8b1a1a;
+    --red-soft: #ff9090;
+    --green: #2e8b57;
+    --green-soft: #56d68d;
+    --amber: #ffaa60;
+    --head-blue: #0f4060;
+    --head-teal: #0a3040;
+    --head-green: #0e3b26;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font);
+    font-size: 15px;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  a { color: var(--cyan); }
+  a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  .page-header { text-align: center; margin-bottom: 18px; }
+  .page-header h1 { font-size: 24px; font-weight: 700; color: var(--fg-strong); letter-spacing: -0.3px; text-wrap: balance; }
+  .page-header .sub { font-size: 14px; color: var(--fg); margin-top: 6px; }
+  .page-header .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .main-grid { display: grid; grid-template-columns: 340px 1fr; gap: 16px; }
+  .main-grid > * { min-width: 0; }
+  .col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+  .card { background: var(--card); border-radius: 12px; border: 1px solid var(--line); overflow: hidden; }
+  .card-header {
+    padding: 9px 14px; font-size: 13px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; text-align: center;
+  }
+  .card-header.red   { background: var(--red-deep); color: #fff; }
+  .card-header.blue  { background: var(--head-blue); color: var(--soft); }
+  .card-header.teal  { background: var(--head-teal); color: var(--soft); }
+  .card-header.green { background: var(--head-green); color: var(--green-soft); }
+
+  /* Reality check */
+  .reality { padding: 14px 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .reality p { font-size: 13.5px; line-height: 1.6; color: var(--fg); max-width: 65ch; }
+  .reality .tag { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .reality .tag.warn { color: var(--red-soft); }
+  .reality strong { color: var(--fg-strong); }
+
+  /* Inputs */
+  .input-row { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
+  .input-row:nth-child(odd)  { background: var(--row-a); }
+  .input-row:nth-child(even) { background: var(--row-b); }
+  .input-row.last { border-bottom: none; }
+  .input-label { flex: 1; padding: 7px 10px; font-size: 13px; color: var(--fg); min-width: 0; }
+  .input-cell { padding: 4px 8px; min-width: 110px; display: flex; align-items: center; justify-content: flex-end; gap: 3px; }
+  .input-cell .pfx, .input-cell .sfx { font-size: 14px; color: var(--cyan); }
+  .input-cell input {
+    width: 84px; text-align: right; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 5px; padding: 4px 6px; font-size: 14px; color: var(--cyan);
+    font-family: inherit; transition: border-color 0.15s;
+  }
+  .input-cell input:focus { border-color: var(--cyan); outline: none; }
+  .row-note { padding: 7px 12px; font-size: 11.5px; color: var(--muted-2); background: var(--deep); line-height: 1.5; }
+  .row-note a { color: var(--soft); }
+
+  .toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; background: var(--deep); border-bottom: 1px solid var(--line); }
+  .toggle button {
+    background: var(--bg); border: 1.5px solid var(--line); border-radius: 7px; padding: 7px 6px;
+    color: var(--muted); font: 600 12.5px/1.2 var(--font); cursor: pointer; transition: all 0.15s;
+  }
+  .toggle button:hover { border-color: var(--muted); }
+  .toggle button.on { border-color: var(--cyan); color: var(--cyan); background: #051a26; }
+  .readout { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 12px; background: var(--deep); border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  .readout b { font-size: 16px; color: var(--cyan); font-variant-numeric: tabular-nums; }
+
+  /* Info icon + tooltip (same as Bad Hire Calculator) */
+  .info {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; margin-left: 5px; border-radius: 50%;
+    border: 1px solid var(--muted); background: transparent; color: var(--soft);
+    font: italic 700 10px/1 Georgia, 'Times New Roman', serif; text-transform: none;
+    letter-spacing: 0; cursor: help; vertical-align: 1px; flex-shrink: 0;
+  }
+  .info:hover, .info.on { background: var(--cyan); border-color: var(--cyan); color: var(--bg); }
+  .card-header .info { border-color: currentColor; color: inherit; }
+  .card-header .info:hover, .card-header .info.on { background: #fff; border-color: #fff; color: var(--bg); }
+  #tip {
+    position: fixed; z-index: 50; max-width: 290px; background: var(--deep);
+    border: 1px solid var(--muted); border-radius: 8px; padding: 10px 12px;
+    font-size: 12.5px; line-height: 1.5; color: var(--fg); box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    pointer-events: none; text-align: left; text-transform: none; letter-spacing: 0; font-weight: 400;
+  }
+  #tip b { display: block; color: var(--soft); margin-bottom: 3px; }
+  #tip .why { display: block; margin-top: 6px; color: #8fb8cc; }
+  #tip .why::before { content: 'Why it matters: '; color: var(--cyan); font-weight: 600; }
+  #tip .how { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+  #tip .how::before { content: 'How to fill it in: '; color: var(--green-soft); font-weight: 600; }
+
+  /* Scenario */
+  .scenario-wrap { padding: 12px; }
+  .scenario-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 10px; }
+  .scen-btn {
+    background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 6px;
+    text-align: center; cursor: pointer; font-family: inherit; transition: all 0.15s; color: var(--fg);
+  }
+  .scen-btn:hover { border-color: var(--muted); }
+  .scen-btn.a-min { border-color: var(--green); background: #0a1f12; border-width: 2px; }
+  .scen-btn.a-avg { border-color: var(--cyan); background: #051a26; border-width: 2px; }
+  .scen-btn.a-max { border-color: var(--red); background: #1a0808; border-width: 2px; }
+  .scen-name { font-size: 15px; font-weight: 600; }
+  .scen-name.min { color: var(--green); }
+  .scen-name.avg { color: var(--cyan); }
+  .scen-name.max { color: var(--red); }
+  .scen-note { font-size: 11px; color: var(--muted-2); margin-top: 2px; }
+  .scenario-desc { font-size: 12px; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--line); padding-top: 8px; }
+  .scenario-desc strong { color: var(--soft); }
+
+  .tbl-scroll { overflow-x: auto; }
+  .factor-tbl { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .factor-tbl th { padding: 6px 10px; background: #0a1f30; color: var(--muted); font-weight: 500; text-align: left; border-bottom: 1px solid var(--line); }
+  .factor-tbl td { padding: 6px 10px; border-bottom: 1px solid #1a2d3a; color: var(--soft); }
+  .factor-tbl .min-c { text-align: center; color: var(--green); font-weight: 500; }
+  .factor-tbl .avg-c { text-align: center; color: var(--cyan); font-weight: 500; }
+  .factor-tbl .max-c { text-align: center; color: var(--red); font-weight: 500; }
+  .factor-tbl tr.sel td { background: #0a1f30; }
+
+  /* Comparison */
+  .cmp-head, .cmp-row, .cmp-total {
+    display: grid; grid-template-columns: minmax(0,1fr) 104px 104px; gap: 8px; align-items: center; padding: 8px 12px;
+  }
+  .cmp-head { background: var(--deep); border-bottom: 1px solid var(--line); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cmp-head .d { color: var(--red-soft); text-align: right; }
+  .cmp-head .r { color: var(--green-soft); text-align: right; }
+  .cmp-head .l { color: var(--muted-2); }
+  .cmp-row { border-bottom: 1px solid var(--line); }
+  .cmp-row:nth-child(odd)  { background: var(--row-a); }
+  .cmp-row:nth-child(even) { background: var(--row-b); }
+  .cmp-label { font-size: 13px; color: var(--fg); min-width: 0; }
+  .cmp-sub { display: block; font-size: 11px; color: var(--muted-2); margin-top: 2px; }
+  .amt { font-size: 14px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+  .amt.d { color: var(--red-soft); }
+  .amt.r { color: var(--green-soft); }
+  .cmp-total { background: var(--deep); border-top: 2px solid var(--line); }
+  .cmp-total .cmp-label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; font-size: 13px; }
+  .cmp-total .amt { font-size: 16px; font-weight: 700; }
+
+  .verdict { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: var(--red-deep); padding: 13px 14px; }
+  .verdict.good { background: var(--head-green); }
+  .verdict-label { font-size: 14px; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: 0.05em; }
+  .verdict-right { display: flex; align-items: center; gap: 12px; }
+  .verdict-amt { font-size: 24px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+  .badge { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 5px 12px; text-align: center; color: #fff; }
+  .badge-num { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .badge-sub { font-size: 10.5px; color: rgba(255,255,255,0.6); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 1px; }
+
+  /* Time */
+  .time-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  .time-cell { padding: 14px 12px; text-align: center; border-right: 1px solid var(--line); }
+  .time-cell:last-child { border-right: none; }
+  .time-num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .time-num.d { color: var(--red-soft); }
+  .time-num.r { color: var(--green-soft); }
+  .time-num.c { color: var(--cyan); }
+  .time-lbl { font-size: 11.5px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+
+  .chart-wrap { padding: 14px; }
+  .chart-container { position: relative; height: 190px; }
+
+  /* Sources */
+  .sources { list-style: none; }
+  .sources li { padding: 9px 14px; border-bottom: 1px solid var(--line); font-size: 12.5px; line-height: 1.5; color: var(--fg); }
+  .sources li:last-child { border-bottom: none; }
+  .sources li:nth-child(odd) { background: var(--row-a); }
+  .sources li:nth-child(even) { background: var(--row-b); }
+  .sources .stat { color: var(--cyan); font-weight: 600; }
+  .sources .src { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .sources .src a { color: var(--soft); }
+  .sources .flag { color: var(--amber); }
+
+  @media (max-width: 760px) {
+    body { padding-inline: 16px; padding-block: 16px; }
+    .main-grid { grid-template-columns: 1fr; }
+    .reality { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 440px) {
+    .cmp-head, .cmp-row, .cmp-total { grid-template-columns: minmax(0,1fr) 82px 82px; gap: 6px; padding-inline: 10px; }
+    .amt { font-size: 13px; }
+    .time-num { font-size: 21px; }
+    .verdict-amt { font-size: 20px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<style>
+  .cmp-row2, .cmp-total2 { display: grid; grid-template-columns: minmax(0,1fr) 120px; gap: 8px; align-items: center; padding: 9px 12px; }
+  .cmp-row2 { border-bottom: 1px solid var(--line); }
+  .cmp-row2:nth-child(odd)  { background: var(--row-a); }
+  .cmp-row2:nth-child(even) { background: var(--row-b); }
+  .cmp-total2 { background: var(--deep); border-top: 2px solid var(--line); }
+  .cmp-total2 .cmp-label { font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .cmp-total2 .amt { font-size: 17px; font-weight: 700; }
+  .fee-row { display: grid; grid-template-columns: minmax(0,1fr) 120px; gap: 8px; align-items: center; padding: 9px 12px; background: var(--row-b); border-top: 1px solid var(--line); }
+  .time-grid.two { grid-template-columns: 1fr 1fr; }
+  .toggle.single { grid-template-columns: 1fr; border-bottom: none; border-top: 1px solid var(--line); }
+  #grp-deals.off { opacity: 0.35; pointer-events: none; }
+  .amt.na { color: var(--muted); font-size: 12.5px; font-weight: 500; }
+</style>
+
+<div class="wrap">
+
+  <div class="page-header">
+    <h1>DIY Hiring Calculator</h1>
+    <p class="sub">What a search costs when you run it yourself, compared to a recruiter's fee.</p>
+    <p class="hint">Hover or tap any <span class="info" aria-hidden="true">i</span> icon for a plain-English explanation.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header blue">Before You Start</div>
+    <div class="reality">
+      <p><span class="tag">The common path</span>Doing it yourself is how most startups hire. It can be the cheapest route if you are a strong recruiter. Good founders ask their network and their board.</p>
+      <p><span class="tag warn">What gets missed</span>Founders rarely count the hours a search takes. Rushed searches are easy to get wrong. The result: <strong>wrong people, wrong seats, wrong time.</strong></p>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- LEFT: inputs -->
+    <div class="col">
+
+      <div class="card">
+        <div class="card-header red">Your Search</div>
+        <div class="input-row"><div class="input-label">Role Salary (Annual)<button class="info" data-tip="salary" aria-label="About Role Salary">i</button></div><div class="input-cell"><span class="pfx">$</span><input id="i-salary" type="number" value="180000" step="5000" min="0"></div></div>
+        <div class="input-row last"><div class="input-label">Recruiter Fee<button class="info" data-tip="fee" aria-label="About Recruiter Fee">i</button></div><div class="input-cell"><input id="i-fee" type="number" value="25" step="1" min="0" max="100"><span class="sfx">%</span></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header blue">Value of Your Time<button class="info" data-tip="method" aria-label="About Value of Your Time">i</button></div>
+        <div id="grp-deals">
+          <div class="input-row"><div class="input-label">Deals You Close / Year<button class="info" data-tip="deals" aria-label="About Deals You Close">i</button></div><div class="input-cell"><input id="i-deals" type="number" value="10" step="1" min="0"></div></div>
+          <div class="input-row last"><div class="input-label">Average Deal Size<button class="info" data-tip="size" aria-label="About Average Deal Size">i</button></div><div class="input-cell"><span class="pfx">$</span><input id="i-size" type="number" value="50000" step="5000" min="0"></div></div>
+          <div class="readout"><span>Revenue you bring in</span><b id="o-rev">$0/yr</b></div>
+          <div class="readout"><span>One hour of your time</span><b id="o-hourly">$0/hr</b></div>
+        </div>
+        <div class="toggle single"><button type="button" id="b-skip" aria-pressed="false">Not sure? Show hours only</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header blue">DIY Scenario<button class="info" data-tip="scenario" aria-label="About DIY Scenario">i</button></div>
+        <div class="scenario-wrap">
+          <div class="scenario-grid">
+            <button type="button" class="scen-btn" id="btn-min" data-s="min"><div class="scen-name min">Best</div><div class="scen-note">Strong recruiter</div></button>
+            <button type="button" class="scen-btn a-avg" id="btn-avg" data-s="avg"><div class="scen-name avg">Typical</div><div class="scen-note">Most founders</div></button>
+            <button type="button" class="scen-btn" id="btn-max" data-s="max"><div class="scen-name max">Worst</div><div class="scen-note">Rushed search</div></button>
+          </div>
+          <div class="scenario-desc" id="scen-desc"></div>
+        </div>
+        <div class="tbl-scroll">
+          <table class="factor-tbl">
+            <thead><tr><th>DIY range</th><th class="min-c">Best</th><th class="avg-c">Typical</th><th class="max-c">Worst</th></tr></thead>
+            <tbody>
+              <tr><td>Months to fill<button class="info" data-tip="months" aria-label="About Months to Fill">i</button></td><td class="min-c">4</td><td class="avg-c">6</td><td class="max-c">12</td></tr>
+              <tr><td>Your hours / week<button class="info" data-tip="hours" aria-label="About Hours per Week">i</button></td><td class="min-c">5</td><td class="avg-c">10</td><td class="max-c">15</td></tr>
+              <tr><td>Mishire odds<button class="info" data-tip="mishire" aria-label="About Mishire Odds">i</button></td><td class="min-c">40%</td><td class="avg-c">46%</td><td class="max-c">70%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: results -->
+    <div class="col">
+
+      <div class="card">
+        <div class="card-header red">Hidden Cost of DIY</div>
+        <div class="cmp-rows">
+          <div class="cmp-row2"><div class="cmp-label">Your Time<button class="info" data-tip="c-time" aria-label="About Your Time cost">i</button><span class="cmp-sub" id="s-time"></span></div><div class="amt d" id="d-time">$0</div></div>
+          <div class="cmp-row2"><div class="cmp-label">Mishire Risk<button class="info" data-tip="c-risk" aria-label="About Mishire Risk cost">i</button><span class="cmp-sub" id="s-risk"></span></div><div class="amt d" id="d-risk">$0</div></div>
+        </div>
+        <div class="cmp-total2"><div class="cmp-label">Hidden DIY Cost</div><div class="amt d" id="d-total">$0</div></div>
+        <div class="fee-row"><div class="cmp-label">Recruiter Fee<button class="info" data-tip="fee" aria-label="About Recruiter Fee">i</button><span class="cmp-sub" id="s-fee"></span></div><div class="amt r" id="r-fee">$0</div></div>
+        <div class="verdict good" id="verdict">
+          <span class="verdict-label" id="verdict-label">You save with a recruiter</span>
+          <div class="verdict-right">
+            <span class="verdict-amt" id="verdict-amt">$0</span>
+            <div class="badge"><div class="badge-num" id="badge-num">0x</div><div class="badge-sub">DIY cost vs fee</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header teal">Your Hours on This Search<button class="info" data-tip="c-hours" aria-label="About Your Hours">i</button></div>
+        <div class="time-grid two">
+          <div class="time-cell"><div class="time-num d" id="h-diy">0</div><div class="time-lbl">hours you spend recruiting</div></div>
+          <div class="time-cell"><div class="time-num c" id="h-weeks">0</div><div class="time-lbl">40-hour work weeks</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header blue">Numbers Behind the Ranges</div>
+        <ul class="sources">
+          <li><span class="stat">40%</span> of new executives leave within 18 months. Used for Best mishire odds.<span class="src">Center for Creative Leadership, 2006</span></li>
+          <li><span class="stat">46%</span> of new hires fail within 18 months. Used for Typical mishire odds.<span class="src"><a href="https://www.industryweek.com/the-economy/public-policy/article/21949369/study-nearly-half-of-new-hires-fail" target="_blank" rel="noopener">Leadership IQ study of 20,000+ hires</a></span></li>
+          <li><span class="stat">70%</span> of first VP of Sales hires at SaaS startups don't last 12 months. Used for Worst mishire odds.<span class="src"><a href="https://labs.openviewpartners.com/fatal-sales-hiring-mistakes" target="_blank" rel="noopener">Jason Lemkin, SaaStr, via OpenView</a></span></li>
+          <li><span class="stat">3 in 4</span> founders spend under 20% of their time on hiring. Anchors the Typical hours.<span class="src"><a href="https://business.linkedin.com/talent-solutions/blog/small-business/2018/recruiting-sales-leaders-and-9-more-of-the-biggest-challenges-startups-are-facing" target="_blank" rel="noopener">LinkedIn founder survey, 2018</a></span></li>
+          <li><span class="stat">6 months to a year</span> to fill a senior role when founders run it alone.<span class="src">Kris Watson, 18 years of search experience</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="tip" role="tooltip" hidden></div>
+
+<script>
+  // ---- Scenario ranges ----
+  const SCEN = {
+    months:  { min: 4,    avg: 6,    max: 12   },
+    hours:   { min: 5,    avg: 10,   max: 15   },
+    mishire: { min: 0.40, avg: 0.46, max: 0.70 }
+  };
+  const WORK_HOURS_YEAR = 2080;      // 40 hrs x 52 weeks
+  const WEEKS_PER_MONTH = 52 / 12;   // 4.33
+
+  const DESCS = {
+    min: '<strong>Best case.</strong> A founder who recruits well. 4 months, 5 hours a week, 40% mishire odds.',
+    avg: '<strong>Typical.</strong> 6 months, 10 hours a week, 46% mishire odds.',
+    max: '<strong>Worst case.</strong> A rushed or restarted search. 12 months, 15 hours a week, 70% mishire odds.'
+  };
+
+  const TIPS = {
+    salary:  ['Role Salary (Annual)', 'Base yearly pay for the role you are hiring.', 'Sets the recruiter fee and the mishire risk.', 'Type the yearly base salary in dollars. Example: 180000.'],
+    fee:     ['Recruiter Fee', 'The recruiter\'s fee as a percent of first-year base salary.', 'This is the number DIY founders are trying to save. The calculator compares the hidden DIY cost against it.', 'Type a whole percent. Example: 25.'],
+    method:  ['Value of Your Time', 'Revenue you bring in personally, spread across your work hours.', 'Hours spent recruiting are hours not spent closing deals.', 'Not sure of your numbers? Tap "Show hours only." Your time will show in hours with no dollar value.'],
+    deals:   ['Deals You Close / Year', 'Deals you personally closed or led in the last 12 months.', 'These are the deals that slow down when you are busy recruiting.', 'Type a whole number. Example: 10. Pre-revenue? Tap "Show hours only."'],
+    size:    ['Average Deal Size', 'Typical first-year value of one of those deals.', 'Deals x deal size = revenue you bring in each year.', 'Type in dollars. Example: 50000.'],
+    scenario:['DIY Scenario', 'Pick how the search goes when you run it yourself.', 'Shows a range instead of a single guess.'],
+    months:  ['Months to Fill', 'Time from opening the search to the new hire\'s first day.', 'Longer searches mean more of your hours.'],
+    hours:   ['Your Hours / Week', 'Your time on sourcing, screening, interviews, references, and closing.', 'This is the time founders most often undercount.'],
+    mishire: ['Mishire Odds', 'Chance the hire fails or leaves within 18 months.', 'A failed hire means paying for a year of salary on someone who did not work out.'],
+    'c-time':['Your Time', 'Your hours on the search x what one hour of your time brings in.', 'Revenue you did not bring in because you were recruiting.'],
+    'c-risk':['Mishire Risk', 'Mishire odds x one year of the role\'s salary.', 'Kept to one year of salary on purpose. The full cost of a bad hire is usually higher. See the Bad Hire Calculator for the full picture.'],
+    'c-hours':['Your Hours', 'Total hours you put into this one search.', 'Hours you could spend on growth instead.']
+  };
+
+  // ---- Tooltips ----
+  const tipEl = document.getElementById('tip');
+  let pinned = null;
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  function showTip(btn) {
+    const t = TIPS[btn.dataset.tip];
+    if (!t) return;
+    tipEl.innerHTML = '<b>' + esc(t[0]) + '</b>' + esc(t[1]) + '<span class="why">' + esc(t[2]) + '</span>' + (t[3] ? '<span class="how">' + esc(t[3]) + '</span>' : '');
+    tipEl.hidden = false;
+    const r = btn.getBoundingClientRect();
+    const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    let left = Math.max(8, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - 8));
+    let top = r.bottom + 8;
+    if (top + h > window.innerHeight - 8) top = r.top - h - 8;
+    tipEl.style.left = left + 'px';
+    tipEl.style.top = Math.max(8, top) + 'px';
+  }
+  function hideTip() { tipEl.hidden = true; if (pinned) { pinned.classList.remove('on'); pinned = null; } }
+  document.querySelectorAll('.info[data-tip]').forEach(btn => {
+    btn.type = 'button';
+    btn.addEventListener('mouseenter', () => showTip(btn));
+    btn.addEventListener('mouseleave', () => { if (pinned !== btn) tipEl.hidden = true; });
+    btn.addEventListener('focus', () => showTip(btn));
+    btn.addEventListener('blur', () => { if (pinned !== btn) tipEl.hidden = true; });
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (pinned === btn) { hideTip(); return; }
+      hideTip(); pinned = btn; btn.classList.add('on'); showTip(btn);
+    });
+  });
+  document.addEventListener('click', hideTip);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hideTip(); });
+  window.addEventListener('scroll', () => { if (!tipEl.hidden) hideTip(); }, { passive: true });
+
+  // ---- Math ----
+  function compute(inp, s) {
+    const rev = inp.skip ? 0 : inp.deals * inp.size;
+    const hr = rev / WORK_HOURS_YEAR;
+    const hours = SCEN.hours[s] * SCEN.months[s] * WEEKS_PER_MONTH;
+    const time = hours * hr;
+    const risk = SCEN.mishire[s] * inp.salary;
+    const total = time + risk;
+    const fee = (inp.fee / 100) * inp.salary;
+    return { rev, hr, hours, time, risk, total, fee, savings: total - fee };
+  }
+
+  // ---- UI ----
+  let scenario = 'avg';
+  let skip = false;
+  const $ = id => document.getElementById(id);
+  const num = id => { const v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+  const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+  const fmt = n => '$' + Math.round(Math.max(n, 0)).toLocaleString('en-US');
+
+  function readInputs() {
+    return {
+      salary: Math.max(num('i-salary'), 0),
+      fee:    clamp(num('i-fee'), 0, 100),
+      deals:  Math.max(num('i-deals'), 0),
+      size:   Math.max(num('i-size'), 0),
+      skip
+    };
+  }
+
+  function setScenario(s) {
+    scenario = s;
+    ['min','avg','max'].forEach(k => $('btn-' + k).className = 'scen-btn' + (k === s ? ' a-' + k : ''));
+    $('scen-desc').innerHTML = DESCS[s];
+    recalc();
+  }
+
+  function recalc() {
+    const inp = readInputs();
+    const r = compute(inp, scenario);
+    $('o-rev').textContent = fmt(r.rev) + '/yr';
+    $('o-hourly').textContent = fmt(r.hr) + '/hr';
+    $('s-time').textContent = skip ? Math.round(r.hours) + ' hrs. No $ value counted.' : Math.round(r.hours) + ' hrs x ' + fmt(r.hr) + '/hr';
+    $('s-risk').textContent = Math.round(SCEN.mishire[scenario] * 100) + '% x ' + fmt(inp.salary) + ' salary';
+    $('s-fee').textContent = Math.round(inp.fee) + '% x ' + fmt(inp.salary);
+    $('d-time').textContent = skip ? 'Hours only' : fmt(r.time);
+    $('d-time').classList.toggle('na', skip);
+    $('d-risk').textContent = fmt(r.risk);
+    $('d-total').textContent = fmt(r.total);
+    $('r-fee').textContent = fmt(r.fee);
+
+    const v = $('verdict');
+    if (r.savings >= 0) { v.classList.add('good'); $('verdict-label').textContent = 'You save with a recruiter'; }
+    else { v.classList.remove('good'); $('verdict-label').textContent = 'DIY is cheaper by'; }
+    $('verdict-amt').textContent = fmt(Math.abs(r.savings));
+    $('badge-num').textContent = r.fee > 0 ? (r.total / r.fee).toFixed(1) + 'x' : 'n/a';
+
+    $('h-diy').textContent = Math.round(r.hours).toLocaleString('en-US');
+    $('h-weeks').textContent = (r.hours / 40).toFixed(1);
+  }
+
+  $('b-skip').addEventListener('click', () => {
+    skip = !skip;
+    $('b-skip').classList.toggle('on', skip);
+    $('b-skip').setAttribute('aria-pressed', skip);
+    $('b-skip').textContent = skip ? 'Use my deal numbers' : 'Not sure? Show hours only';
+    $('grp-deals').classList.toggle('off', skip);
+    recalc();
+  });
+  document.querySelectorAll('.scen-btn').forEach(b => b.addEventListener('click', () => setScenario(b.dataset.s)));
+  document.querySelectorAll('input').forEach(el => el.addEventListener('input', recalc));
+  setScenario('avg');
+</script>
+
+</body>
+</html>
