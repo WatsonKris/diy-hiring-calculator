@@ -110,7 +110,7 @@
   .card-header .info { border-color: currentColor; color: inherit; }
   .card-header .info:hover, .card-header .info.on { background: #fff; border-color: #fff; color: var(--bg); }
   #tip {
-    position: fixed; z-index: 50; max-width: 290px; background: var(--deep);
+    position: fixed; z-index: 50; max-width: 320px; background: var(--deep);
     border: 1px solid var(--muted); border-radius: 8px; padding: 10px 12px;
     font-size: 12.5px; line-height: 1.5; color: var(--fg); box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     pointer-events: none; text-align: left; text-transform: none; letter-spacing: 0; font-weight: 400;
@@ -120,6 +120,11 @@
   #tip .why::before { content: 'Why it matters: '; color: var(--cyan); font-weight: 600; }
   #tip .how { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
   #tip .how::before { content: 'How to fill it in: '; color: var(--green-soft); font-weight: 600; }
+  #tip .bk { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+  #tip .bk-h { display: block; color: var(--green-soft); font-weight: 600; margin-bottom: 2px; }
+  #tip .bk span.item { display: block; margin-top: 3px; }
+  .factor-tbl th .info { vertical-align: 0; }
+  .factor-tbl th { white-space: nowrap; }
 
   /* Scenario */
   .scenario-wrap { padding: 12px; }
@@ -242,10 +247,10 @@
   </div>
 
   <div class="card">
-    <div class="card-header blue">Before You Start</div>
+    <div class="card-header blue">When DIY Works, and When It Stops</div>
     <div class="reality">
-      <p><span class="tag">The common path</span>Doing it yourself is how most startups hire. It can be the cheapest route if you are a strong recruiter. Good founders ask their network and their board.</p>
-      <p><span class="tag warn">What gets missed</span>Founders rarely count the hours a search takes. Rushed searches are easy to get wrong. The result: <strong>wrong people, wrong seats, wrong time.</strong></p>
+      <p><span class="tag">Start with your network</span>Referrals and your own network are the right start for early hires. Most founders begin here, and many good hires come from it.</p>
+      <p><span class="tag warn">Know when to bring in a trusted talent expert</span>DIY works until you stop getting the quality and speed your team needs. When the months pile up or the role is critical, the right outside recruiter gets you <strong>quality and speed the first time.</strong></p>
     </div>
   </div>
 
@@ -283,10 +288,10 @@
         </div>
         <div class="tbl-scroll">
           <table class="factor-tbl">
-            <thead><tr><th>DIY range</th><th class="min-c">Best</th><th class="avg-c">Typical</th><th class="max-c">Worst</th></tr></thead>
+            <thead><tr><th>DIY range</th><th class="min-c">Best<button class="info" data-tip="s-best" aria-label="Research behind Best case">i</button></th><th class="avg-c">Typical<button class="info" data-tip="s-typ" aria-label="Research behind Typical case">i</button></th><th class="max-c">Worst<button class="info" data-tip="s-worst" aria-label="Research behind Worst case">i</button></th></tr></thead>
             <tbody>
               <tr><td>Months to fill<button class="info" data-tip="months" aria-label="About Months to Fill">i</button></td><td class="min-c">4</td><td class="avg-c">6</td><td class="max-c">12</td></tr>
-              <tr><td>Your hours / week<button class="info" data-tip="hours" aria-label="About Hours per Week">i</button></td><td class="min-c">5</td><td class="avg-c">10</td><td class="max-c">15</td></tr>
+              <tr><td>Your hours / week<button class="info" data-tip="hours" aria-label="About Hours per Week">i</button></td><td class="min-c">2</td><td class="avg-c">6</td><td class="max-c">12.5</td></tr>
               <tr><td>Mishire odds<button class="info" data-tip="mishire" aria-label="About Mishire Odds">i</button></td><td class="min-c">40%</td><td class="avg-c">46%</td><td class="max-c">70%</td></tr>
             </tbody>
           </table>
@@ -329,7 +334,10 @@
           <li><span class="stat">40%</span> of new executives leave within 18 months. Used for Best mishire odds.<span class="src">Center for Creative Leadership, 2006</span></li>
           <li><span class="stat">46%</span> of new hires fail within 18 months. Used for Typical mishire odds.<span class="src"><a href="https://www.industryweek.com/the-economy/public-policy/article/21949369/study-nearly-half-of-new-hires-fail" target="_blank" rel="noopener">Leadership IQ study of 20,000+ hires</a></span></li>
           <li><span class="stat">70%</span> of first VP of Sales hires at SaaS startups don't last 12 months. Used for Worst mishire odds.<span class="src"><a href="https://labs.openviewpartners.com/fatal-sales-hiring-mistakes" target="_blank" rel="noopener">Jason Lemkin, SaaStr, via OpenView</a></span></li>
-          <li><span class="stat">3 in 4</span> founders spend under 20% of their time on hiring. Anchors the Typical hours.<span class="src"><a href="https://business.linkedin.com/talent-solutions/blog/small-business/2018/recruiting-sales-leaders-and-9-more-of-the-biggest-challenges-startups-are-facing" target="_blank" rel="noopener">LinkedIn founder survey, 2018</a></span></li>
+          <li><span class="stat">~3%</span> of a founder's tracked time went to recruiting over two years, about 2 hours a week. Used for Best hours.<span class="src"><a href="https://review.firstround.com/an-exact-breakdown-of-how-one-ceo-spent-his-first-two-years-of-company-building/" target="_blank" rel="noopener">Sam Corcos, Levels CEO, 7,922 tracked hours, via First Round Review</a></span></li>
+          <li><span class="stat">53%</span> of startups spend 10% or less of their time recruiting. 10% is about 6 hours a week. Used for Typical hours.<span class="src"><a href="https://www.hubspot.com/startups/go-to-market-startups/2019" target="_blank" rel="noopener">HubSpot for Startups survey of 290+ startups, 2019</a></span></li>
+          <li><span class="stat">1 in 4</span> founders spend 20% or more of their time on hiring. 20% is about 12.5 hours a week. Used for Worst hours.<span class="src"><a href="https://business.linkedin.com/talent-solutions/blog/small-business/2018/recruiting-sales-leaders-and-9-more-of-the-biggest-challenges-startups-are-facing" target="_blank" rel="noopener">First Round State of Startups 2017, ~900 founders, via LinkedIn</a></span></li>
+          <li><span class="stat">62.5 hours</span> is the average CEO work week. Used to turn percentages into hours.<span class="src"><a href="https://www.mgma.com/articles/test-of-time-harvard-study-reveals-how-ceos-spend-their-days-on-and-off-work" target="_blank" rel="noopener">Harvard Business School study of 27 CEOs, 60,000+ hours</a></span></li>
           <li><span class="stat">6 months to a year</span> to fill a senior role when founders run it alone.<span class="src">Kris Watson, 18 years of search experience</span></li>
         </ul>
       </div>
@@ -344,16 +352,16 @@
   // ---- Scenario ranges ----
   const SCEN = {
     months:  { min: 4,    avg: 6,    max: 12   },
-    hours:   { min: 5,    avg: 10,   max: 15   },
+    hours:   { min: 2,    avg: 6,    max: 12.5 },
     mishire: { min: 0.40, avg: 0.46, max: 0.70 }
   };
   const WORK_HOURS_YEAR = 2080;      // 40 hrs x 52 weeks
   const WEEKS_PER_MONTH = 52 / 12;   // 4.33
 
   const DESCS = {
-    min: '<strong>Best case.</strong> A founder who recruits well. 4 months, 5 hours a week, 40% mishire odds.',
-    avg: '<strong>Typical.</strong> 6 months, 10 hours a week, 46% mishire odds.',
-    max: '<strong>Worst case.</strong> A rushed or restarted search. 12 months, 15 hours a week, 70% mishire odds.'
+    min: '<strong>Best case.</strong> A founder who recruits well. 4 months, 2 hours a week, 40% mishire odds.',
+    avg: '<strong>Typical.</strong> 6 months, 6 hours a week, 46% mishire odds.',
+    max: '<strong>Worst case.</strong> A rushed or restarted search. 12 months, 12.5 hours a week, 70% mishire odds.'
   };
 
   const TIPS = {
@@ -363,8 +371,19 @@
     deals:   ['Deals You Close / Year', 'Deals you personally closed or led in the last 12 months.', 'These are the deals that slow down when you are busy recruiting.', 'Type a whole number. Example: 10. Pre-revenue? Tap "Show hours only."'],
     size:    ['Average Deal Size', 'Typical first-year value of one of those deals.', 'Deals x deal size = revenue you bring in each year.', 'Type in dollars. Example: 50000.'],
     scenario:['DIY Scenario', 'Pick how the search goes when you run it yourself.', 'Shows a range instead of a single guess.'],
+    's-best': ['Best case: 2 hrs/week, 40% mishire odds', 'A founder who recruits well and keeps the search tight.', 'Hours are a share of a 62.5-hour CEO week (Harvard Business School study of 27 CEOs).', null,
+               ['Hours: a startup CEO tracked 7,922 hours over two years. About 3% went to recruiting. (Sam Corcos, Levels, via First Round Review)',
+                'Mishire: about 40% of new executives leave within 18 months. (Center for Creative Leadership)']],
+    's-typ':  ['Typical: 6 hrs/week, 46% mishire odds', 'What most founders spend on recruiting.', 'Hours are a share of a 62.5-hour CEO week (Harvard Business School study of 27 CEOs).', null,
+               ['Hours: 53% of 290+ startups spend 10% or less of their time recruiting. (HubSpot for Startups, 2019)',
+                'Mishire: 46% of new hires fail within 18 months, across 20,000+ hires. (Leadership IQ)',
+                'Months: 6 months to fill, from 18 years of executive search. (Kris Watson)']],
+    's-worst':['Worst case: 12.5 hrs/week, 70% mishire odds', 'A rushed or restarted search.', 'Hours are a share of a 62.5-hour CEO week (Harvard Business School study of 27 CEOs).', null,
+               ['Hours: 1 in 4 of ~900 founders spend 20% or more of their time on hiring. (First Round State of Startups, 2017)',
+                'Mishire: 70% of first SaaS VP of Sales hires don\'t last 12 months. (Jason Lemkin, SaaStr)',
+                'Months: up to a year to fill, from 18 years of executive search. (Kris Watson)']],
     months:  ['Months to Fill', 'Time from opening the search to the new hire\'s first day.', 'Longer searches mean more of your hours.'],
-    hours:   ['Your Hours / Week', 'Your time on sourcing, screening, interviews, references, and closing.', 'This is the time founders most often undercount.'],
+    hours:   ['Your Hours / Week', 'Your time on sourcing, screening, interviews, references, and closing.', 'This is the time founders most often undercount.', 'Based on the share of time founders spend recruiting: 3%, 10% and 20% of a 62.5-hour week. See Numbers Behind the Ranges.'],
     mishire: ['Mishire Odds', 'Chance the hire fails or leaves within 18 months.', 'A failed hire means paying for a year of salary on someone who did not work out.'],
     'c-time':['Your Time', 'Your hours on the search x what one hour of your time brings in.', 'Revenue you did not bring in because you were recruiting.'],
     'c-risk':['Mishire Risk', 'Mishire odds x one year of the role\'s salary.', 'Kept to one year of salary on purpose. The full cost of a bad hire is usually higher. See the Bad Hire Calculator for the full picture.'],
@@ -378,7 +397,8 @@
   function showTip(btn) {
     const t = TIPS[btn.dataset.tip];
     if (!t) return;
-    tipEl.innerHTML = '<b>' + esc(t[0]) + '</b>' + esc(t[1]) + '<span class="why">' + esc(t[2]) + '</span>' + (t[3] ? '<span class="how">' + esc(t[3]) + '</span>' : '');
+    const bk = t[4] ? '<span class="bk"><span class="bk-h">Backed by research</span>' + t[4].map(x => '<span class="item">' + esc(x) + '</span>').join('') + '</span>' : '';
+    tipEl.innerHTML = '<b>' + esc(t[0]) + '</b>' + esc(t[1]) + (t[4] ? '' : '<span class="why">' + esc(t[2]) + '</span>') + (t[3] ? '<span class="how">' + esc(t[3]) + '</span>' : '') + bk + (t[4] ? '<span class="item" style="display:block;margin-top:6px;color:#8fb8cc">' + esc(t[2]) + '</span>' : '');
     tipEl.hidden = false;
     const r = btn.getBoundingClientRect();
     const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
